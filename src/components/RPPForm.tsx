@@ -18,18 +18,27 @@ interface RPPFormProps {
   initialData?: LessonPlan | null;
   onBack: () => void;
   onSave: () => void;
+  apiKey?: string;
 }
 
-export function RPPForm({ user, initialData, onBack, onSave }: RPPFormProps) {
+export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormProps) {
   const [currentStep, setCurrentStep] = useState<Step>('identifikasi');
   const [loading, setLoading] = useState(false);
   const [genLoading, setGenLoading] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<LessonPlan>(initialData || {
     userId: user.uid,
-    subject: "Bahasa Indonesia",
+    subject: "Pendidikan Agama Islam",
     grade: "8",
     topic: "",
+    academicYear: "2024/2025",
+    semester: "Ganjil",
+    schoolName: "SMP Muhammadiyah 1 Probolinggo",
+    teacherName: "Aminudin, S.Pd.",
+    teacherId: "1640634",
+    principalName: "Rachmawati Fitriyah, S.H., S.Pd.",
+    principalId: "1083916",
+    logoUrl: "",
     date: new Date().toISOString(),
     pancasilaProfiles: [],
     identifikasi: { pesertaDidik: "", analisisMateri: "" },
@@ -54,7 +63,10 @@ export function RPPForm({ user, initialData, onBack, onSave }: RPPFormProps) {
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(apiKey ? { "x-api-key": apiKey } : {})
+        },
         body: JSON.stringify({ 
           section, 
           subject: formData.subject, 
@@ -99,46 +111,157 @@ export function RPPForm({ user, initialData, onBack, onSave }: RPPFormProps) {
     }
   };
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, logoUrl: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const pannels = {
     identifikasi: (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700 ml-1">Mata Pelajaran</label>
-            <select 
-              value={formData.subject}
-              onChange={(e) => setFormData({...formData, subject: e.target.value})}
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-            >
-              <option>Bahasa Indonesia</option>
-              <option>Matematika</option>
-              <option>IPA</option>
-              <option>IPS</option>
-              <option>Pendidikan Pancasila</option>
-              <option>Bahasa Inggris</option>
-              <option>Seni Budaya</option>
-              <option>PJOK</option>
-            </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Mata Pelajaran</label>
+              <select 
+                value={formData.subject}
+                onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+              >
+                <option>Pendidikan Agama Islam</option>
+                <option>Bahasa Indonesia</option>
+                <option>Matematika</option>
+                <option>IPA</option>
+                <option>IPS</option>
+                <option>Pendidikan Pancasila</option>
+                <option>Bahasa Inggris</option>
+                <option>Seni Budaya</option>
+                <option>PJOK</option>
+              </select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Kelas</label>
+                <select 
+                  value={formData.grade}
+                  onChange={(e) => setFormData({...formData, grade: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                >
+                  {[1,2,3,4,5,6,7,8,9,10,11,12].map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Semester</label>
+                <select 
+                  value={formData.semester}
+                  onChange={(e) => setFormData({...formData, semester: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                >
+                  <option>Ganjil</option>
+                  <option>Genap</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Tahun Ajaran</label>
+              <input 
+                placeholder="Contoh: 2024/2025"
+                value={formData.academicYear}
+                onChange={(e) => setFormData({...formData, academicYear: e.target.value})}
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+              />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700 ml-1">Kelas</label>
-            <select 
-              value={formData.grade}
-              onChange={(e) => setFormData({...formData, grade: e.target.value})}
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-            >
-              {[1,2,3,4,5,6,7,8,9,10,11,12].map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
+
+          <div className="space-y-4">
+             <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Topik Pembelajaran</label>
+              <input 
+                placeholder="Contoh: Ekosistem / Puasa Ramadhan"
+                value={formData.topic}
+                onChange={(e) => setFormData({...formData, topic: e.target.value})}
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Nama Sekolah</label>
+              <input 
+                value={formData.schoolName}
+                onChange={(e) => setFormData({...formData, schoolName: e.target.value})}
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Logo Sekolah</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden" 
+                  id="logo-upload" 
+                />
+                <label 
+                  htmlFor="logo-upload"
+                  className="flex-1 cursor-pointer bg-white border-2 border-dashed border-gray-200 rounded-xl px-4 py-2 text-xs text-gray-500 text-center hover:bg-gray-50 transition-all"
+                >
+                  {formData.logoUrl ? "Ganti Logo" : "Upload Logo"}
+                </label>
+                {formData.logoUrl && (
+                  <img src={formData.logoUrl} className="h-10 w-10 object-contain rounded border p-1" alt="Logo" />
+                )}
+              </div>
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700 ml-1">Topik Pembelajaran</label>
-            <input 
-              placeholder="Contoh: Ekosistem"
-              value={formData.topic}
-              onChange={(e) => setFormData({...formData, topic: e.target.value})}
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-            />
-          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-2xl border border-gray-100">
+           <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Nama Guru</label>
+                <input 
+                  value={formData.teacherName}
+                  onChange={(e) => setFormData({...formData, teacherName: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">NBM / NIP</label>
+                <input 
+                  value={formData.teacherId}
+                  onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm text-sm"
+                />
+              </div>
+           </div>
+           <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Kepala Sekolah</label>
+                <input 
+                  value={formData.principalName}
+                  onChange={(e) => setFormData({...formData, principalName: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">NBM / NIP Kepala</label>
+                <input 
+                  value={formData.principalId}
+                  onChange={(e) => setFormData({...formData, principalId: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm text-sm"
+                />
+              </div>
+           </div>
         </div>
 
         <div className="space-y-8">

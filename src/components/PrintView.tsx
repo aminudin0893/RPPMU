@@ -52,14 +52,18 @@ export function PrintView({ plan, onBack }: PrintViewProps) {
 
         {/* Header (Kop Surat) */}
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 pb-6 border-b-2 border-black mb-8">
-          <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-300 text-gray-400 font-sans text-[10px] text-center p-2 shrink-0">
-            [LOGO SEKOLAH]
+          <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-300 text-gray-400 font-sans text-[10px] text-center p-2 shrink-0 overflow-hidden">
+            {plan.logoUrl ? (
+              <img src={plan.logoUrl} alt="Logo" className="w-full h-full object-contain" />
+            ) : (
+              "[LOGO]"
+            )}
           </div>
           <div className="flex-1 text-center">
-            <h1 className="text-sm md:text-2xl font-bold uppercase tracking-widest font-sans">PEMERINTAH KOTA JAKARTA</h1>
-            <h2 className="text-xs md:text-xl font-bold font-sans uppercase">DINAS PENDIDIKAN DAN KEBUDAYAAN</h2>
-            <h1 className="text-lg md:text-3xl font-black font-sans">SMP NEGERI 32 JAKARTA</h1>
-            <p className="text-[10px] md:text-xs italic font-sans mt-1">Jl. Contoh No. 123, Jakarta Selatan, Kode Pos 12345</p>
+            <h1 className="text-sm md:text-2xl font-bold uppercase tracking-widest font-sans">MAJELIS PENDIDIKAN DASAR DAN MENENGAH</h1>
+            <h2 className="text-xs md:text-xl font-bold font-sans uppercase">PIMPINAN DAERAH MUHAMMADIYAH PROBOLINGGO</h2>
+            <h1 className="text-lg md:text-3xl font-black font-sans uppercase">{plan.schoolName}</h1>
+            <p className="text-[10px] md:text-xs italic font-sans mt-1">Jl. KH Wahid Hasyim No. 1, Probolinggo, Jawa Timur</p>
           </div>
         </div>
 
@@ -71,7 +75,8 @@ export function PrintView({ plan, onBack }: PrintViewProps) {
         {/* Info Grid */}
         <div className="grid grid-cols-[1fr] sm:grid-cols-[150px_10px_1fr] gap-y-1 sm:gap-y-2 mb-10 text-xs md:text-sm font-sans font-medium border p-4 rounded-xl md:border-none md:p-0">
           <div className="text-gray-500 sm:text-gray-900">Mata Pelajaran</div><div className="hidden sm:block">:</div><div className="font-bold">{plan.subject}</div>
-          <div className="text-gray-500 sm:text-gray-900 border-t pt-1 sm:pt-0 sm:border-none">Kelas / Semester</div><div className="hidden sm:block">:</div><div className="font-bold">{plan.grade} / Ganjil</div>
+          <div className="text-gray-500 sm:text-gray-900 border-t pt-1 sm:pt-0 sm:border-none">Kelas / Semester</div><div className="hidden sm:block">:</div><div className="font-bold">{plan.grade} / {plan.semester}</div>
+          <div className="text-gray-500 sm:text-gray-900 border-t pt-1 sm:pt-0 sm:border-none">Tahun Ajaran</div><div className="hidden sm:block">:</div><div className="font-bold">{plan.academicYear}</div>
           <div className="text-gray-500 sm:text-gray-900 border-t pt-1 sm:pt-0 sm:border-none">Topik / Materi</div><div className="hidden sm:block">:</div><div className="font-bold">{plan.topic}</div>
           <div className="text-gray-500 sm:text-gray-900 border-t pt-1 sm:pt-0 sm:border-none">Alokasi Waktu</div><div className="hidden sm:block">:</div><div className="font-bold">2 x 45 Menit</div>
           <div className="text-gray-500 sm:text-gray-900 border-t pt-1 sm:pt-0 sm:border-none">Profil Pelajar Pancasila</div><div className="hidden sm:block">:</div><div className="font-bold italic">{plan.pancasilaProfiles.join(", ")}</div>
@@ -103,19 +108,19 @@ export function PrintView({ plan, onBack }: PrintViewProps) {
         </div>
 
         {/* Signature */}
-        <div className="mt-12 md:mt-20 grid grid-cols-1 sm:grid-cols-2 gap-10 text-center font-sans text-xs md:text-sm">
+        <div className="mt-12 md:mt-20 grid grid-cols-[1fr_1fr] gap-10 text-center font-sans text-xs md:text-sm">
           <div className="space-y-12 md:space-y-20">
             <p>Mengetahui,<br/>Kepala Sekolah</p>
             <div className="space-y-1">
-              <p className="font-bold underline">NAMA KEPALA SEKOLAH, M.Pd.</p>
-              <p>NIP. 198001012010011001</p>
+              <p className="font-bold underline uppercase">{plan.principalName}</p>
+              <p>NBM: {plan.principalId}</p>
             </div>
           </div>
           <div className="space-y-12 md:space-y-20">
-            <p className="sm:inline hidden">Jakarta, </p><p>{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br/>Guru Mata Pelajaran</p>
+            <p>Probolinggo, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br/>Guru Mata Pelajaran</p>
             <div className="space-y-1">
-              <p className="font-bold underline">NAMA GURU PENGAMPU, S.Pd.</p>
-              <p>NIP. 199012312020122002</p>
+              <p className="font-bold underline uppercase">{plan.teacherName}</p>
+              <p>NBM: {plan.teacherId}</p>
             </div>
           </div>
         </div>

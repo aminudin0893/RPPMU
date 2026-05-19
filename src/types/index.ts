@@ -4,6 +4,14 @@ export interface LessonPlan {
   subject: string;
   grade: string;
   topic: string;
+  academicYear: string;
+  semester: string;
+  schoolName: string;
+  teacherName: string;
+  teacherId: string;
+  principalName: string;
+  principalId: string;
+  logoUrl?: string;
   date: string;
   pancasilaProfiles: string[];
   identifikasi: {

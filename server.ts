@@ -23,6 +23,15 @@ const ai = new GoogleGenAI({
 app.post("/api/generate", async (req, res) => {
   try {
     const { section, subject, grade, topic, context } = req.body;
+    const customKey = req.headers['x-api-key'] as string;
+    
+    let activeAi = ai;
+    if (customKey && customKey.trim() && customKey !== "MY_GEMINI_API_KEY") {
+      activeAi = new GoogleGenAI({ 
+        apiKey: customKey,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
+    }
     
     const prompts: Record<string, string> = {
       pesertaDidik: `Identifikasi karakteristik peserta didik kelas ${grade} untuk mata pelajaran ${subject} dengan topik "${topic}". Berikan ringkasan yang membantu guru menyesuaikan pengajaran.`,
@@ -43,7 +52,7 @@ app.post("/api/generate", async (req, res) => {
 
     const prompt = prompts[section] || `Berikan konten untuk bagian "${section}" pada modul ajar "${topic}" (${subject} kelas ${grade}). Context: ${context || ''}`;
 
-    const response = await ai.models.generateContent({
+    const response = await activeAi.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
     });

@@ -4,39 +4,54 @@
  */
 
 import { useState, useEffect } from "react";
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import { auth } from "./lib/firebase";
 import { Layout } from "./components/Layout";
 import { Dashboard } from "./components/Dashboard";
 import { RPPForm } from "./components/RPPForm";
 import { PrintView } from "./components/PrintView";
 import { LessonPlan } from "./types";
-import { LogIn } from "lucide-react";
+import { LogIn, Key } from "lucide-react";
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
+  const [pin, setPin] = useState("");
+  const [apiKey, setApiKey] = useState(localStorage.getItem("GEMINI_API_KEY") || "");
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"dashboard" | "form" | "print">("dashboard");
   const [selectedPlan, setSelectedPlan] = useState<LessonPlan | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    const savedUser = localStorage.getItem("asisguru_user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
   }, []);
 
-  const login = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Login failed:", error);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pin === "085227") {
+      const newUser = { 
+        uid: "user_aminudin", 
+        displayName: "Aminudin, S.Pd.", 
+        email: "aminudin0893@gmail.com",
+        photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher"
+      };
+      setUser(newUser);
+      localStorage.setItem("asisguru_user", JSON.stringify(newUser));
+    } else {
+      alert("PIN Salah!");
     }
   };
 
-  const logout = () => signOut(auth);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("asisguru_user");
+  };
+
+  const handleApiKeyChange = (val: string) => {
+    setApiKey(val);
+    localStorage.setItem("GEMINI_API_KEY", val);
+  };
 
   if (loading) {
     return (
@@ -59,19 +74,36 @@ export default function App() {
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">AsisGuru</h1>
             <p className="text-gray-500">Asisten Pintar Guru untuk menyusun Modul Ajar AI</p>
           </div>
-          <button
-            onClick={login}
-            className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
-          >
-            Masuk dengan Google
-          </button>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1 text-left">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Masukkan PIN Login</label>
+              <input 
+                type="password"
+                placeholder="6 Digit PIN"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center text-2xl tracking-[1em]"
+                maxLength={6}
+              />
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
+            >
+              Masuk
+            </button>
+          </form>
+
+          <p className="text-xs text-gray-400">Hubungi Admin untuk mendapatkan PIN</p>
         </div>
       </div>
     );
   }
 
   return (
-    <Layout user={user} logout={logout} currentView={view} setView={setView}>
+    <Layout user={user} logout={logout} currentView={view} setView={setView} apiKey={apiKey} onApiKeyChange={handleApiKeyChange}>
       {view === "dashboard" && (
         <Dashboard 
           user={user} 
@@ -95,6 +127,7 @@ export default function App() {
           initialData={selectedPlan} 
           onBack={() => setView("dashboard")} 
           onSave={() => setView("dashboard")}
+          apiKey={apiKey}
         />
       )}
       {view === "print" && selectedPlan && (

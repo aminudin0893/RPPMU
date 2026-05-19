@@ -5,7 +5,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  BookOpen
+  BookOpen,
+  Key
 } from "lucide-react";
 import { cn } from "../lib/utils";
 
@@ -15,9 +16,11 @@ interface LayoutProps {
   logout: () => void;
   currentView: string;
   setView: (view: any) => void;
+  apiKey: string;
+  onApiKeyChange: (val: string) => void;
 }
 
-export function Layout({ children, user, logout, currentView, setView }: LayoutProps) {
+export function Layout({ children, user, logout, currentView, setView, apiKey, onApiKeyChange }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(window.innerWidth > 768);
 
   // Close sidebar on navigation in mobile
@@ -86,6 +89,24 @@ export function Layout({ children, user, logout, currentView, setView }: LayoutP
             {isSidebarOpen && <span className="font-medium">Keluar</span>}
           </button>
         </div>
+
+        {isSidebarOpen && (
+          <div className="p-4 border-t border-gray-100 bg-purple-50/50">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-purple-600">
+                <Key className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase">Gemini API Key</span>
+              </div>
+              <input 
+                type="password"
+                placeholder="Enter API Key..."
+                value={apiKey}
+                onChange={(e) => onApiKeyChange(e.target.value)}
+                className="w-full bg-white border border-purple-100 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-purple-400 outline-none"
+              />
+            </div>
+          </div>
+        )}
 
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
