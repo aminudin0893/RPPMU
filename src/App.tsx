@@ -4,14 +4,12 @@
  */
 
 import { useState, useEffect } from "react";
-import { signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "./lib/firebase";
 import { Layout } from "./components/Layout";
 import { Dashboard } from "./components/Dashboard";
 import { RPPForm } from "./components/RPPForm";
 import { PrintView } from "./components/PrintView";
 import { LessonPlan } from "./types";
-import { LogIn, Key, Eye, EyeOff } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
@@ -23,44 +21,18 @@ export default function App() {
   const [selectedPlan, setSelectedPlan] = useState<LessonPlan | null>(null);
 
   useEffect(() => {
-    // Listen for auth changes to sync with local user state
-    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-      const savedUser = localStorage.getItem("asisguru_user");
-      if (fbUser && savedUser) {
-        // We are logged in both to FB and our local state
-        setUser(JSON.parse(savedUser));
-      } else if (!fbUser && savedUser) {
-        // We have local state but FB logged out? Re-auth anonymously
-        signInAnonymously(auth).catch(console.error);
-      }
-    });
-
     const savedUser = localStorage.getItem("asisguru_user");
-    if (savedUser && !auth.currentUser) {
-      signInAnonymously(auth).catch(console.error);
-    }
-    
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
     setLoading(false);
-    return () => unsubscribe();
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin === "085227") {
-      let uid = "user_aminudin_local";
-      try {
-        const cred = await signInAnonymously(auth);
-        uid = cred.user.uid;
-      } catch (error: any) {
-        console.warn("Firebase Auth restricted (Anonymous login disabled):", error.message);
-        // We continue with local state even if auth fails
-      }
-      
       const newUser = { 
-        uid: uid, 
+        uid: "user_aminudin_local", 
         displayName: "Aminudin, S.Pd.", 
         email: "aminudin0893@gmail.com",
         photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher"
@@ -73,7 +45,6 @@ export default function App() {
   };
 
   const logout = () => {
-    signOut(auth);
     setUser(null);
     localStorage.removeItem("asisguru_user");
   };

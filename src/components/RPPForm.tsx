@@ -7,10 +7,9 @@ import {
   ChevronLeft, 
   Save, 
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Download
 } from "lucide-react";
-import { db } from "../lib/firebase";
-import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { cn } from "../lib/utils";
 
 interface RPPFormProps {
@@ -54,12 +53,12 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
     { id: 'asesmen', label: '4. Asesmen' }
   ];
 
-  const generateAI = async (section: string) => {
+  const generateAI = async (section: string, silent = false) => {
     if (!formData.topic) {
-      alert("Harap isi Topik Pembelajaran terlebih dahulu!");
+      if (!silent) alert("Harap isi Topik Pembelajaran terlebih dahulu!");
       return;
     }
-    setGenLoading(section);
+    if (!silent) setGenLoading(section);
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -88,37 +87,118 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
         throw new Error(data.error || "Gagal menghubungi AI. Pastikan API Key Anda benar.");
       }
       
-      const newFormData = { ...formData };
-      if (['pesertaDidik', 'analisisMateri'].includes(section)) {
-        (newFormData.identifikasi as any)[section] = data.content;
-      } else if (['capaian', 'lintasDisiplin', 'tujuan', 'praktik', 'lingkungan', 'teknologi'].includes(section)) {
-        (newFormData.desain as any)[section] = data.content;
-      } else if (['awal', 'inti', 'penutup'].includes(section)) {
-        (newFormData.pengalaman as any)[section] = data.content;
-      } else if (['asesmenAwal', 'asesmenProses', 'asesmenAkhir'].includes(section)) {
-        const key = section.replace('asesmen', '').toLowerCase();
-        (newFormData.asesmen as any)[key] = data.content;
+      if (response.ok && data.content) {
+        setFormData(prev => {
+          const next = { ...prev };
+          if (['pesertaDidik', 'analisisMateri'].includes(section)) {
+            next.identifikasi = { ...next.identifikasi, [section]: data.content };
+          } else if (['capaian', 'lintasDisiplin', 'tujuan', 'praktik', 'lingkungan', 'teknologi'].includes(section)) {
+            next.desain = { ...next.desain, [section]: data.content };
+          } else if (['awal', 'inti', 'penutup'].includes(section)) {
+            next.pengalaman = { ...next.pengalaman, [section]: data.content };
+          } else if (['asesmenAwal', 'asesmenProses', 'asesmenAkhir'].includes(section)) {
+            const key = section.replace('asesmen', '').toLowerCase();
+            next.asesmen = { ...next.asesmen, [key]: data.content };
+          }
+          return next;
+        });
+        return true;
       }
-      setFormData(newFormData);
     } catch (error: any) {
       console.error("Generation failed:", error);
-      alert("AI Error: " + (error.message || "Gagal menghasilkan konten. Coba periksa koneksi atau API Key."));
+      if (!silent) alert("AI Error: " + (error.message || "Gagal menghasilkan konten. Coba periksa koneksi atau API Key."));
+      throw error;
+    } finally {
+      if (!silent) setGenLoading(null);
+    }
+  };
+
+  const generateStepContent = async () => {
+    const sectionsByStep: Record<Step, string[]> = {
+      identifikasi: ['pesertaDidik', 'analisisMateri'],
+      desain: ['capaian', 'lintasDisiplin', 'tujuan', 'praktik', 'lingkungan', 'teknologi'],
+      pengalaman: ['awal', 'inti', 'penutup'],
+      asesmen: ['asesmenAwal', 'asesmenProses', 'asesmenAkhir']
+    };
+
+    const targetSections = sectionsByStep[currentStep];
+    setGenLoading('all');
+    
+    try {
+      for (let i = 0; i < targetSections.length; i++) {
+        const section = targetSections[i];
+        // Add a delay between requests to avoid burst rate limits (429)
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+        await generateAI(section, true);
+      }
+    } catch (error: any) {
+      const isQuota = error.message?.includes('429') || error.message?.includes('quota');
+      if (isQuota) {
+        alert("Kuota AI (Free Tier) telah habis untuk saat ini. Mohon tunggu beberapa saat atau coba lagi besok. Anda juga bisa memasukkan API Key sendiri di sidebar.");
+      } else {
+        alert("Beberapa bagian gagal dihasilkan. Silakan coba lagi atau cek API Key di menu sidebar.");
+      }
     } finally {
       setGenLoading(null);
     }
   };
 
+  const isStepEmpty = () => {
+    if (currentStep === 'identifikasi') {
+      return !formData.identifikasi.pesertaDidik || !formData.identifikasi.analisisMateri;
+    }
+    if (currentStep === 'desain') {
+      return !formData.desain.capaian || !formData.desain.tujuan || !formData.desain.praktik;
+    }
+    if (currentStep === 'pengalaman') {
+      return !formData.pengalaman.awal || !formData.pengalaman.inti || !formData.pengalaman.penutup;
+    }
+    if (currentStep === 'asesmen') {
+      return !formData.asesmen.awal || !formData.asesmen.proses || !formData.asesmen.akhir;
+    }
+    return false;
+  };
+
+  const handleDownload = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `RPP_${formData.topic.replace(/\s+/g, '_') || 'Tanpa_Judul'}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
-      if (formData.id) {
-        await updateDoc(doc(db, "lessonPlans", formData.id), { ...formData, date: new Date().toISOString() });
-      } else {
-        await addDoc(collection(db, "lessonPlans"), { ...formData, date: new Date().toISOString() });
+      const saved = localStorage.getItem("asisguru_lesson_plans");
+      let allPlans: LessonPlan[] = [];
+      if (saved) {
+        allPlans = JSON.parse(saved);
       }
+
+      const planToSave = { ...formData, date: new Date().toISOString() };
+
+      if (formData.id) {
+        const index = allPlans.findIndex(p => p.id === formData.id);
+        if (index !== -1) {
+          allPlans[index] = planToSave;
+        } else {
+          allPlans.push(planToSave);
+        }
+      } else {
+        const newPlan = { ...planToSave, id: Math.random().toString(36).substr(2, 9) };
+        allPlans.push(newPlan);
+      }
+
+      localStorage.setItem("asisguru_lesson_plans", JSON.stringify(allPlans));
       onSave();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Save failed:", error);
+      alert("Gagal menyimpan: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -425,26 +505,62 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
           </button>
 
           <div className="flex items-center gap-4">
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-2 text-blue-600 font-semibold px-4 py-3 hover:bg-blue-50 rounded-xl transition-all"
+              title="Unduh file JSON"
+            >
+              <Download className="w-5 h-5" />
+              <span className="hidden sm:inline">Unduh JSON</span>
+            </button>
             {currentStep !== 'asesmen' ? (
-              <button
-                onClick={() => {
-                  const idx = steps.findIndex(s => s.id === currentStep);
-                  setCurrentStep(steps[idx+1].id);
-                }}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
-              >
-                <span>Lanjut</span>
-                <ChevronRight className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-3">
+                {isStepEmpty() && (
+                  <button
+                    onClick={generateStepContent}
+                    disabled={genLoading === 'all'}
+                    className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {genLoading === 'all' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                    <span>Generate Konten AI</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    const idx = steps.findIndex(s => s.id === currentStep);
+                    setCurrentStep(steps[idx+1].id);
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 font-bold px-8 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98]",
+                    isStepEmpty() ? "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none" : "bg-blue-600 hover:bg-blue-700 text-white"
+                  )}
+                  disabled={isStepEmpty()}
+                >
+                  <span>Lanjut</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             ) : (
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                <span>Simpan RPP</span>
-              </button>
+              <div className="flex items-center gap-3">
+                {isStepEmpty() && (
+                  <button
+                    onClick={generateStepContent}
+                    disabled={genLoading === 'all'}
+                    className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {genLoading === 'all' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                    <span>Generate Konten AI</span>
+                  </button>
+                )}
+                <button
+                  onClick={handleSave}
+                  disabled={loading || isStepEmpty()}
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                  <span>Simpan RPP</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

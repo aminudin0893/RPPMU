@@ -31,20 +31,20 @@ app.post("/api/generate", async (req, res) => {
     });
     
     const prompts: Record<string, string> = {
-      pesertaDidik: `Identifikasi karakteristik peserta didik kelas ${grade} untuk mata pelajaran ${subject} dengan topik "${topic}". Berikan ringkasan dalam poin-poin (bullet points) yang sangat detail dan membantu guru menyesuaikan pengajaran.`,
-      analisisMateri: `Lakukan analisis materi untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Sebutkan konsep kunci, prasyarat, dan potensi kesulitan siswa dalam poin-poin (bullet points).`,
-      capaian: `Berikan Capaian Pembelajaran (CP) yang relevan untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade} sesuai Kurikulum Merdeka terbaru. Sajikan dalam poin-poin (bullet points).`,
-      lintasDisiplin: `Sebutkan keterkaitan topik "${topic}" (${subject} kelas ${grade}) dengan disiplin ilmu lain atau kehidupan nyata dan Profil Pelajar Pancasila dalam poin-poin (bullet points).`,
-      tujuan: `Rumuskan 5 Tujuan Pembelajaran (TP) yang ABCD (Audience, Behavior, Condition, Degree) untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Tuliskan dalam poin-poin (bullet points).`,
-      praktik: `Rekomendasikan praktik pedagogis atau model pembelajaran aktif (misal: PBL, Discovery Learning, PjBL) yang paling cocok untuk mengajarkan "${topic}" pada kelas ${grade}. Jelaskan langkah-langkahnya dalam poin-poin (bullet points).`,
-      lingkungan: `Saran pengaturan lingkungan belajar (fisik/sosial) untuk mendukung pembelajaran topik "${topic}" secara inklusif. Sajikan dalam poin-poin (bullet points).`,
-      teknologi: `Saran pemanfaatan teknologi digital (aplikasi, AI, alat peraga digital) yang relevan untuk memperkuat pembelajaran "${topic}". Sajikan dalam poin-poin (bullet points).`,
-      awal: `Tuliskan langkah-langkah kegiatan awal/pembukaan (sekitar 10-15 menit) yang menarik untuk memulai pelajaran tentang "${topic}". Sertakan apersepsi dan motivasi dalam poin-poin (bullet points).`,
-      inti: `Tuliskan langkah-langkah kegiatan inti pembelajaran yang aktif, berdiferensiasi, dan berpusat pada siswa untuk topik "${topic}". Gunakan sinta-sintaks model pembelajaran yang disarankan. Sajikan dalam poin-poin (bullet points) yang sangat detail.`,
-      penutup: `Tuliskan langkah-langkah kegiatan penutup (refleksi, kesimpulan, dan umpan balik) untuk mengakhiri sesi pembelajaran "${topic}". Sajikan dalam poin-poin (bullet points).`,
-      asesmenAwal: `Rancang instrumen atau teknik asesmen awal (diagnostik) untuk mengukur kesiapan dan pengetahuan awal siswa sebelum mempelajari "${topic}". Sajikan dalam poin-poin (bullet points).`,
-      asesmenProses: `Rancang teknik asesmen formatif (observasi, penilaian diri, dll) selama proses pembelajaran "${topic}" untuk memantau kemajuan siswa. Sajikan dalam poin-poin (bullet points).`,
-      asesmenAkhir: `Rancang instrumen asesmen sumatif (tes tulis/produk/performa) di akhir pembelajaran topik "${topic}" untuk mengukur ketercapaian tujuan pembelajaran. Sajikan dalam poin-poin (bullet points).`,
+      pesertaDidik: `Identifikasi karakteristik peserta didik kelas ${grade} untuk mata pelajaran ${subject} dengan topik "${topic}". Susun dalam Bahasa Indonesia yang sangat formal, profesional, dan sistematis. Sajikan dalam poin-poin (bullet points) detail yang mencakup gaya belajar, minat, dan tingkat kesiapan untuk mendukung pembelajaran berdiferensiasi.`,
+      analisisMateri: `Lakukan analisis materi mendalam untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan Bahasa Indonesia formal (beku/resmi). Uraikan fakta, konsep, prinsip, dan prosedur secara terstruktur dalam poin-poin (bullet points), serta identifikasi potensi kesulitan pemahaman siswa.`,
+      capaian: `Rumuskan Capaian Pembelajaran (CP) yang selaras dengan Kurikulum Merdeka terbaru untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan kalimat formal dan baku sesuai standar Kemendikbudristek.`,
+      lintasDisiplin: `Uraikan keterkaitan topik "${topic}" (${subject} kelas ${grade}) dengan Profil Pelajar Pancasila dan disiplin ilmu lainnya secara formal dan akademis. Sajikan dalam poin-poin (bullet points).`,
+      tujuan: `Susun minimal 5 Tujuan Pembelajaran (TP) yang memenuhi unsur ABCD (Audience, Behavior, Condition, Degree) secara sangat spesifik dan menggunakan kata kerja operasional (KKO) Taksonomi Bloom yang baku untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan Bahasa Indonesia resmi.`,
+      praktik: `Rancang strategi atau model pembelajaran aktif (seperti PBL, PjBL, atau Discovery Learning) yang paling relevan untuk topik "${topic}" pada kelas ${grade}. Jabarkan sintaks atau langkah-langkahnya secara sistematis dan formal.`,
+      lingkungan: `Berikan rekomendasi pengaturan lingkungan belajar yang inklusif, kondusif, dan mendukung student agency untuk topik "${topic}". Gunakan gaya bahasa profesional dan teknis kependidikan.`,
+      teknologi: `Saran pemanfaatan teknologi digital (media interaktif, AI, atau platform pembelajaran) yang efektif untuk memperkuat kompetensi siswa pada topik "${topic}". Gunakan istilah teknologi yang akurat dan formal.`,
+      awal: `Susun skenario kegiatan pendahuluan (apersepsi) selama 15 menit yang profesional untuk topik "${topic}". Mencakup pembukaan, pengecekan kesiapan, motivasi, dan penyampaian tujuan pembelajaran secara terstruktur.`,
+      inti: `Jabarkan langkah-langkah kegiatan inti pembelajaran yang rinci, berdiferensiasi, dan berpusat pada peserta didik untuk topik "${topic}". Gunakan sintaks model pembelajaran yang tepat dengan bahasa operasional yang formal dan mudah dipahami guru.`,
+      penutup: `Rancang kegiatan penutup yang mencakup kesimpulan sistematis, tugas tindak lanjut, dan refleksi bermakna bagi peserta didik untuk topik "${topic}". Gunakan Bahasa Indonesia baku.`,
+      asesmenAwal: `Rancang instrumen asesmen diagnostik formal (kognitif dan non-kognitif) untuk mengetahui kompetensi prasyarat peserta didik sebelum memulai materi "${topic}".`,
+      asesmenProses: `Rancang teknik asesmen formatif yang profesional (seperti rubrik observasi atau penilaian sebaya) untuk memantau perkembangan kompetensi peserta didik selama proses pembelajaran "${topic}".`,
+      asesmenAkhir: `Rancang instrumen asesmen sumatif yang valid dan reliabel untuk mengukur ketercapaian tujuan pembelajaran pada topik "${topic}", lengkap dengan kriteria ketercapaian (KKTP) dalam format resmi.`,
     };
 
     const prompt = prompts[section] || `Berikan konten untuk bagian "${section}" pada modul ajar "${topic}" (${subject} kelas ${grade}). Gunakan poin-poin. Context: ${context || ''}`;

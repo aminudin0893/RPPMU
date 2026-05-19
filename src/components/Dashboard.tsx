@@ -1,14 +1,4 @@
 import { useState, useEffect } from "react";
-import { 
-  collection, 
-  query, 
-  where, 
-  onSnapshot, 
-  deleteDoc, 
-  doc,
-  orderBy
-} from "firebase/firestore";
-import { db } from "../lib/firebase";
 import { LessonPlan } from "../types";
 import { 
   Printer, 
@@ -35,28 +25,40 @@ export function Dashboard({ user, onEdit, onPrint, onCreateNew }: DashboardProps
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const q = query(
-      collection(db, "lessonPlans"),
-      where("userId", "==", user.uid),
-      orderBy("date", "desc")
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as LessonPlan[];
-      setPlans(data);
+    // Load from localStorage
+    const loadFromLocal = () => {
+      const saved = localStorage.getItem("asisguru_lesson_plans");
+      if (saved) {
+        try {
+          const allPlans = JSON.parse(saved) as LessonPlan[];
+          // Filter by user although locally it's probably just one user
+          const userPlans = allPlans.filter(p => p.userId === user.uid)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setPlans(userPlans);
+        } catch (e) {
+          console.error("Failed to parse local plans", e);
+        }
+      }
       setLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
+    loadFromLocal();
+    
+    // Simple way to keep in sync if multiple tabs are open (optional but nice)
+    window.addEventListener('storage', loadFromLocal);
+    return () => window.removeEventListener('storage', loadFromLocal);
   }, [user.uid]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus RPP ini?")) {
       try {
-        await deleteDoc(doc(db, "lessonPlans", id));
+        const saved = localStorage.getItem("asisguru_lesson_plans");
+        if (saved) {
+          const allPlans = JSON.parse(saved) as LessonPlan[];
+          const filtered = allPlans.filter(p => p.id !== id);
+          localStorage.setItem("asisguru_lesson_plans", JSON.stringify(filtered));
+          setPlans(filtered.filter(p => p.userId === user.uid));
+        }
       } catch (error) {
         console.error("Delete failed:", error);
       }
