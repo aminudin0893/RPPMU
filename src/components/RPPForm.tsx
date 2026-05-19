@@ -75,6 +75,10 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
         }),
       });
       const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || "Gagal menghubungi AI. Pastikan API Key Anda benar.");
+      }
       
       const newFormData = { ...formData };
       if (['pesertaDidik', 'analisisMateri'].includes(section)) {
@@ -88,8 +92,9 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
         (newFormData.asesmen as any)[key] = data.content;
       }
       setFormData(newFormData);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Generation failed:", error);
+      alert("AI Error: " + (error.message || "Gagal menghasilkan konten. Coba periksa koneksi atau API Key."));
     } finally {
       setGenLoading(null);
     }
@@ -339,7 +344,6 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
         <SectionArea label="Lintas Disiplin" value={formData.desain.lintasDisiplin} onChange={(v) => setFormData({...formData, desain: {...formData.desain, lintasDisiplin: v}})} onGenerate={() => generateAI('lintasDisiplin')} loading={genLoading === 'lintasDisiplin'} />
         <SectionArea label="Tujuan Pembelajaran" value={formData.desain.tujuan} onChange={(v) => setFormData({...formData, desain: {...formData.desain, tujuan: v}})} onGenerate={() => generateAI('tujuan')} loading={genLoading === 'tujuan'} rows={6} className="md:col-span-2" />
         <SectionArea label="Praktik Pedagogis" value={formData.desain.praktik} onChange={(v) => setFormData({...formData, desain: {...formData.desain, praktik: v}})} onGenerate={() => generateAI('praktik')} loading={genLoading === 'praktik'} />
-        <SectionArea label="Kemitraan/Konteks" value={formData.desain.lintasDisiplin} onChange={(v) => setFormData({...formData, desain: {...formData.desain, lintasDisiplin: v}})} onGenerate={() => generateAI('lintasDisiplin')} loading={genLoading === 'lintasDisiplin'} />
         <SectionArea label="Lingkungan Belajar" value={formData.desain.lingkungan} onChange={(v) => setFormData({...formData, desain: {...formData.desain, lingkungan: v}})} onGenerate={() => generateAI('lingkungan')} loading={genLoading === 'lingkungan'} />
         <SectionArea label="Teknologi Digital" value={formData.desain.teknologi} onChange={(v) => setFormData({...formData, desain: {...formData.desain, teknologi: v}})} onGenerate={() => generateAI('teknologi')} loading={genLoading === 'teknologi'} />
       </div>
