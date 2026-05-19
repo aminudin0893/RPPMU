@@ -17,12 +17,17 @@ app.post("/api/generate", async (req, res) => {
     const customKey = req.headers['x-api-key'] as string;
     
     let keyToUse = process.env.GEMINI_API_KEY;
-    if (customKey && customKey.trim() && customKey !== "MY_GEMINI_API_KEY") {
+    console.log(`[Generate] Request for section: ${section}. Custom Key Present: ${!!customKey}`);
+    
+    if (customKey && customKey.trim() && customKey !== "MY_GEMINI_API_KEY" && customKey.length > 5) {
       keyToUse = customKey;
+      console.log(`[Generate] Using custom user API key (ends with ...${customKey.slice(-4)})`);
+    } else {
+      console.log(`[Generate] Using server/default API key`);
     }
 
     if (!keyToUse || keyToUse === "MY_GEMINI_API_KEY") {
-      return res.status(400).json({ error: "API Key Gemini tidak ditemukan. Harap masukkan API Key Anda di sidebar (icon kunci)." });
+      return res.status(400).json({ error: "API Key Gemini belum diset. Silakan masukkan API Key Anda di menu sidebar (icon kunci)." });
     }
     
     const activeAi = new GoogleGenAI({ 
@@ -31,26 +36,26 @@ app.post("/api/generate", async (req, res) => {
     });
     
     const prompts: Record<string, string> = {
-      pesertaDidik: `Identifikasi karakteristik peserta didik kelas ${grade} untuk mata pelajaran ${subject} dengan topik "${topic}". Susun dalam Bahasa Indonesia yang sangat formal, profesional, dan sistematis. Sajikan dalam poin-poin (bullet points) detail yang mencakup gaya belajar, minat, dan tingkat kesiapan untuk mendukung pembelajaran berdiferensiasi.`,
-      analisisMateri: `Lakukan analisis materi mendalam untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan Bahasa Indonesia formal (beku/resmi). Uraikan fakta, konsep, prinsip, dan prosedur secara terstruktur dalam poin-poin (bullet points), serta identifikasi potensi kesulitan pemahaman siswa.`,
-      capaian: `Rumuskan Capaian Pembelajaran (CP) yang selaras dengan Kurikulum Merdeka terbaru untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan kalimat formal dan baku sesuai standar Kemendikbudristek.`,
-      lintasDisiplin: `Uraikan keterkaitan topik "${topic}" (${subject} kelas ${grade}) dengan Profil Pelajar Pancasila dan disiplin ilmu lainnya secara formal dan akademis. Sajikan dalam poin-poin (bullet points).`,
-      tujuan: `Susun minimal 5 Tujuan Pembelajaran (TP) yang memenuhi unsur ABCD (Audience, Behavior, Condition, Degree) secara sangat spesifik dan menggunakan kata kerja operasional (KKO) Taksonomi Bloom yang baku untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan Bahasa Indonesia resmi.`,
-      praktik: `Rancang strategi atau model pembelajaran aktif (seperti PBL, PjBL, atau Discovery Learning) yang paling relevan untuk topik "${topic}" pada kelas ${grade}. Jabarkan sintaks atau langkah-langkahnya secara sistematis dan formal.`,
-      lingkungan: `Berikan rekomendasi pengaturan lingkungan belajar yang inklusif, kondusif, dan mendukung student agency untuk topik "${topic}". Gunakan gaya bahasa profesional dan teknis kependidikan.`,
-      teknologi: `Saran pemanfaatan teknologi digital (media interaktif, AI, atau platform pembelajaran) yang efektif untuk memperkuat kompetensi siswa pada topik "${topic}". Gunakan istilah teknologi yang akurat dan formal.`,
-      awal: `Susun skenario kegiatan pendahuluan (apersepsi) selama 15 menit yang profesional untuk topik "${topic}". Mencakup pembukaan, pengecekan kesiapan, motivasi, dan penyampaian tujuan pembelajaran secara terstruktur.`,
-      inti: `Jabarkan langkah-langkah kegiatan inti pembelajaran yang rinci, berdiferensiasi, dan berpusat pada peserta didik untuk topik "${topic}". Gunakan sintaks model pembelajaran yang tepat dengan bahasa operasional yang formal dan mudah dipahami guru.`,
-      penutup: `Rancang kegiatan penutup yang mencakup kesimpulan sistematis, tugas tindak lanjut, dan refleksi bermakna bagi peserta didik untuk topik "${topic}". Gunakan Bahasa Indonesia baku.`,
-      asesmenAwal: `Rancang instrumen asesmen diagnostik formal (kognitif dan non-kognitif) untuk mengetahui kompetensi prasyarat peserta didik sebelum memulai materi "${topic}".`,
-      asesmenProses: `Rancang teknik asesmen formatif yang profesional (seperti rubrik observasi atau penilaian sebaya) untuk memantau perkembangan kompetensi peserta didik selama proses pembelajaran "${topic}".`,
-      asesmenAkhir: `Rancang instrumen asesmen sumatif yang valid dan reliabel untuk mengukur ketercapaian tujuan pembelajaran pada topik "${topic}", lengkap dengan kriteria ketercapaian (KKTP) dalam format resmi.`,
+      pesertaDidik: `Berikan analisis karakteristik kognitif dan non-kognitif peserta didik kelas ${grade} untuk mata pelajaran ${subject} pada topik "${topic}". Susun dalam Bahasa Indonesia yang sangat formal, akademis, dan profesional. Sertakan poin-poin detail mengenai gaya belajar, minat, dan tingkat kesiapan untuk mendukung implementasi pembelajaran berdiferensiasi.`,
+      analisisMateri: `Lakukan analisis materi secara mendalam untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan ragam Bahasa Indonesia resmi (formal). Paparkan fakta, konsep, prinsip, dan prosedur secara sistematis dalam poin-poin, serta petakan potensi hambatan belajar atau miskonsepsi yang mungkin dihadapi siswa.`,
+      capaian: `Rumuskan Capaian Pembelajaran (CP) yang akurat dan selaras dengan standar Kurikulum Merdeka terbaru untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Gunakan kalimat formal dan baku sesuai standar Kemendikbudristek.`,
+      lintasDisiplin: `Uraikan keterkaitan antara topik "${topic}" (${subject} kelas ${grade}) dengan Projek Penguatan Profil Pelajar Pancasila (P5) serta integrasi dengan disiplin ilmu lainnya secara formal dan akademis. Sajikan dalam format poin-poin profesional.`,
+      tujuan: `Susun minimal 5 Tujuan Pembelajaran (TP) yang memenuhi kriteria ABCD (Audience, Behavior, Condition, Degree) secara eksplisit dan menggunakan kata kerja operasional (KKO) yang terukur. Gunakan Bahasa Indonesia formal dan sesuaikan dengan tingkat kompetensi siswa kelas ${grade} pada materi "${topic}".`,
+      praktik: `Rekomendasikan model/pendekatan pembelajaran inovatif (seperti Problem Based Learning, Project Based Learning, atau Discovery Learning) yang paling efektif untuk mengajarkan "${topic}" pada siswa kelas ${grade}. Jabarkan langkah-langkah implementasinya secara formal dan prosedural.`,
+      lingkungan: `Rancang strategi pengelolaan lingkungan belajar yang inklusif, kondusif, dan aman untuk mendukung optimalisasi pembelajaran topik "${topic}". Gunakan gaya bahasa profesional dan teknis kependidikan.`,
+      teknologi: `Saran integrasi teknologi digital (seperti media interaktif, kecerdasan buatan, atau platform LMS) yang relevan untuk memperkaya pengalaman belajar pada materi "${topic}". Gunakan istilah teknologi yang akurat dan formal.`,
+      awal: `Susun skenario kegiatan pendahuluan pembelajaran selama 15-20 menit yang mencakup pembukaan resmi, apersepsi yang kontekstual, motivasi ekstrinsik, dan penyampaian tujuan pembelajaran secara terstruktur untuk materi "${topic}".`,
+      inti: `Jabarkan langkah-langkah kegiatan inti pembelajaran yang rinci, berpusat pada siswa (student-centered), dan mengakomodasi keberagaman siswa untuk topik "${topic}". Deskripsikan aktivitas sesuai tahapan model pembelajaran yang dipilih dalam Bahasa Indonesia resmi yang operasional bagi guru.`,
+      penutup: `Tuliskan skenario kegiatan penutup yang mencakup penguatan materi, refleksi metakognitif, umpan balik konstruktif, dan informasi rencana tindak lanjut secara formal untuk mengakhiri sesi pembelajaran "${topic}".`,
+      asesmenAwal: `Rancang instrumen asesmen diagnostik (baik kognitif maupun non-kognitif) secara formal dan profesional untuk memetakan kemampuan awal siswa terkait materi "${topic}".`,
+      asesmenProses: `Rancang instrumen asesmen formatif (seperti lembar observasi, penilaian diri, atau rubrik performa) secara sistematis untuk memantau kemajuan kompetensi siswa selama proses pembelajaran "${topic}".`,
+      asesmenAkhir: `Rancang instrumen asesmen sumatif yang valid dan reliabel untuk mengukur ketercapaian semua tujuan pembelajaran pada materi "${topic}", dilengkapi dengan kriteria ketercapaian tujuan pembelajaran (KKTP) dalam format resmi.`,
     };
 
     const prompt = prompts[section] || `Berikan konten untuk bagian "${section}" pada modul ajar "${topic}" (${subject} kelas ${grade}). Gunakan poin-poin. Context: ${context || ''}`;
 
     const response = await activeAi.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-flash",
       contents: prompt,
     });
 

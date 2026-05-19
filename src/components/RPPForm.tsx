@@ -134,11 +134,12 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
         await generateAI(section, true);
       }
     } catch (error: any) {
-      const isQuota = error.message?.includes('429') || error.message?.includes('quota');
+      console.error("Step generation failed:", error);
+      const isQuota = error.message?.includes('429') || error.message?.includes('quota') || error.message?.includes('RESOURCE_EXHAUSTED');
       if (isQuota) {
-        alert("Kuota AI (Free Tier) telah habis untuk saat ini. Mohon tunggu beberapa saat atau coba lagi besok. Anda juga bisa memasukkan API Key sendiri di sidebar.");
+        alert("Kuota AI (Free Tier) telah habis untuk saat ini (429 Rate Limit). Mohon tunggu beberapa saat (sekitar 1 menit) lalu coba lagi. Anda juga bisa memasukkan API Key sendiri di sidebar untuk melewati batas ini.");
       } else {
-        alert("Beberapa bagian gagal dihasilkan. Silakan coba lagi atau cek API Key di menu sidebar.");
+        alert(`Gagal menghasilkan konten: ${error.message || "Unknown Error"}. Pastikan API Key Anda sudah benar di menu sidebar (icon kunci).`);
       }
     } finally {
       setGenLoading(null);
@@ -147,16 +148,16 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
 
   const isStepEmpty = () => {
     if (currentStep === 'identifikasi') {
-      return !formData.identifikasi.pesertaDidik || !formData.identifikasi.analisisMateri;
+      return !formData.identifikasi.pesertaDidik && !formData.identifikasi.analisisMateri;
     }
     if (currentStep === 'desain') {
-      return !formData.desain.capaian || !formData.desain.tujuan || !formData.desain.praktik;
+      return !formData.desain.capaian && !formData.desain.tujuan && !formData.desain.praktik;
     }
     if (currentStep === 'pengalaman') {
-      return !formData.pengalaman.awal || !formData.pengalaman.inti || !formData.pengalaman.penutup;
+      return !formData.pengalaman.awal && !formData.pengalaman.inti && !formData.pengalaman.penutup;
     }
     if (currentStep === 'asesmen') {
-      return !formData.asesmen.awal || !formData.asesmen.proses || !formData.asesmen.akhir;
+      return !formData.asesmen.awal && !formData.asesmen.proses && !formData.asesmen.akhir;
     }
     return false;
   };

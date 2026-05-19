@@ -8,7 +8,8 @@ import {
   BookOpen,
   Key,
   Eye,
-  EyeOff
+  EyeOff,
+  Loader2
 } from "lucide-react";
 import { cn } from "../lib/utils";
 
@@ -27,6 +28,8 @@ export function Layout({ children, user, logout, currentView, setView, apiKey, o
   const [showApiKey, setShowApiKey] = React.useState(false);
   const [localApiKey, setLocalApiKey] = React.useState(apiKey);
 
+  const [testLoading, setTestLoading] = React.useState(false);
+
   // Sync local key when prop changes (e.g. on mount)
   React.useEffect(() => {
     setLocalApiKey(apiKey);
@@ -34,6 +37,34 @@ export function Layout({ children, user, logout, currentView, setView, apiKey, o
 
   const handleSaveApiKey = () => {
     onApiKeyChange(localApiKey);
+  };
+
+  const handleTestKey = async () => {
+    if (!localApiKey) {
+      alert("Masukkan API Key terlebih dahulu!");
+      return;
+    }
+    setTestLoading(true);
+    try {
+      const resp = await fetch("/api/generate", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "x-api-key": localApiKey 
+        },
+        body: JSON.stringify({ section: "test", subject: "Test", grade: "1", topic: "Test Connection" })
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        alert("Koneksi Berhasil! API Key Anda valid dan siap digunakan.");
+      } else {
+        alert("Koneksi Gagal: " + (data.error || "Cek kembali API Key Anda."));
+      }
+    } catch (e: any) {
+      alert("Error: " + e.message);
+    } finally {
+      setTestLoading(false);
+    }
   };
 
   // Close sidebar on navigation in mobile
@@ -130,12 +161,22 @@ export function Layout({ children, user, logout, currentView, setView, apiKey, o
                   {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
-              <button
-                onClick={handleSaveApiKey}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition-all shadow-sm active:scale-[0.98]"
-              >
-                Simpan API Key
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveApiKey}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition-all shadow-sm active:scale-[0.98]"
+                >
+                  Simpan API Key
+                </button>
+                <button
+                  onClick={handleTestKey}
+                  disabled={testLoading}
+                  className="px-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold py-1.5 rounded-lg transition-all disabled:opacity-50"
+                  title="Tes Koneksi"
+                >
+                  {testLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Tes"}
+                </button>
+              </div>
               <p className="text-[10px] text-purple-400 leading-tight">Gunakan API Key sendiri untuk performa lebih baik.</p>
             </div>
           </div>
