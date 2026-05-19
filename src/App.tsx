@@ -112,6 +112,8 @@ export default function App() {
               <div className="relative">
                 <input 
                   type={showPin ? "text" : "password"}
+                  name="asisguru-login-pin"
+                  autoComplete="off"
                   placeholder="******"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}

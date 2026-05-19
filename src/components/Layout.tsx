@@ -115,6 +115,7 @@ export function Layout({ children, user, logout, currentView, setView, apiKey, o
               <div className="relative group">
                 <input 
                   type={showApiKey ? "text" : "password"}
+                  name="asisguru-gemini-key"
                   placeholder="Paste your key here..."
                   value={localApiKey}
                   onChange={(e) => setLocalApiKey(e.target.value)}

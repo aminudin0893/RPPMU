@@ -11,27 +11,24 @@ const PORT = 3000;
 
 app.use(express.json());
 
-const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
-});
-
 app.post("/api/generate", async (req, res) => {
   try {
     const { section, subject, grade, topic, context } = req.body;
     const customKey = req.headers['x-api-key'] as string;
     
-    let activeAi = ai;
+    let keyToUse = process.env.GEMINI_API_KEY;
     if (customKey && customKey.trim() && customKey !== "MY_GEMINI_API_KEY") {
-      activeAi = new GoogleGenAI({ 
-        apiKey: customKey,
-        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-      });
+      keyToUse = customKey;
     }
+
+    if (!keyToUse || keyToUse === "MY_GEMINI_API_KEY") {
+      return res.status(400).json({ error: "API Key Gemini tidak ditemukan. Harap masukkan API Key Anda di sidebar (icon kunci)." });
+    }
+    
+    const activeAi = new GoogleGenAI({ 
+      apiKey: keyToUse,
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+    });
     
     const prompts: Record<string, string> = {
       pesertaDidik: `Identifikasi karakteristik peserta didik kelas ${grade} untuk mata pelajaran ${subject} dengan topik "${topic}". Berikan ringkasan dalam poin-poin (bullet points) yang sangat detail dan membantu guru menyesuaikan pengajaran.`,
@@ -60,8 +57,19 @@ app.post("/api/generate", async (req, res) => {
     res.json({ content: response.text });
   } catch (error: any) {
     console.error("Gemini Error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message || "Unknown error occurred on server" });
   }
+});
+
+// API 404 handler
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ error: "Endpoint API tidak ditemukan" });
+});
+
+// Global error handler
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error("Express Error:", err);
+  res.status(500).json({ error: "Server crashed", details: err.message });
 });
 
 async function startServer() {

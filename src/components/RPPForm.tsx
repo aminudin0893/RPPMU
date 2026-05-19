@@ -74,7 +74,15 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
           topic: formData.topic 
         }),
       });
-      const data = await response.json();
+      
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Server returned non-JSON response:", responseText);
+        throw new Error(`Server Error: Response is not valid JSON. (Status: ${response.status})`);
+      }
 
       if (!response.ok || data.error) {
         throw new Error(data.error || "Gagal menghubungi AI. Pastikan API Key Anda benar.");
