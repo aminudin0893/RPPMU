@@ -6,7 +6,9 @@ import {
   Menu, 
   X,
   BookOpen,
-  Key
+  Key,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { cn } from "../lib/utils";
 
@@ -22,6 +24,7 @@ interface LayoutProps {
 
 export function Layout({ children, user, logout, currentView, setView, apiKey, onApiKeyChange }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(window.innerWidth > 768);
+  const [showApiKey, setShowApiKey] = React.useState(false);
 
   // Close sidebar on navigation in mobile
   const handleNav = (view: string) => {
@@ -93,17 +96,29 @@ export function Layout({ children, user, logout, currentView, setView, apiKey, o
         {isSidebarOpen && (
           <div className="p-4 border-t border-gray-100 bg-purple-50/50">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-purple-600">
-                <Key className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase">Gemini API Key</span>
+              <div className="flex items-center justify-between text-purple-600">
+                <div className="flex items-center gap-2">
+                  <Key className="w-4 h-4" />
+                  <span className="text-xs font-bold uppercase underline decoration-purple-200 decoration-2 underline-offset-4">Gemini API Key</span>
+                </div>
               </div>
-              <input 
-                type="password"
-                placeholder="Enter API Key..."
-                value={apiKey}
-                onChange={(e) => onApiKeyChange(e.target.value)}
-                className="w-full bg-white border border-purple-100 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-purple-400 outline-none"
-              />
+              <div className="relative group">
+                <input 
+                  type={showApiKey ? "text" : "password"}
+                  placeholder="Paste your key here..."
+                  value={apiKey}
+                  onChange={(e) => onApiKeyChange(e.target.value)}
+                  className="w-full bg-white border border-purple-100 rounded-lg pl-3 pr-9 py-2 text-xs focus:ring-2 focus:ring-purple-400 outline-none shadow-sm transition-all"
+                />
+                <button 
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-purple-400 hover:text-purple-600 p-1"
+                  title={showApiKey ? "Sembunyikan" : "Tampilkan"}
+                >
+                  {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+              <p className="text-[10px] text-purple-400 leading-tight">Gunakan API Key sendiri untuk performa lebih baik.</p>
             </div>
           </div>
         )}

@@ -9,11 +9,12 @@ import { Dashboard } from "./components/Dashboard";
 import { RPPForm } from "./components/RPPForm";
 import { PrintView } from "./components/PrintView";
 import { LessonPlan } from "./types";
-import { LogIn, Key } from "lucide-react";
+import { LogIn, Key, Eye, EyeOff } from "lucide-react";
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [pin, setPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
   const [apiKey, setApiKey] = useState(localStorage.getItem("GEMINI_API_KEY") || "");
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"dashboard" | "form" | "print">("dashboard");
@@ -77,15 +78,24 @@ export default function App() {
           
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1 text-left">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Masukkan PIN Login</label>
-              <input 
-                type="password"
-                placeholder="6 Digit PIN"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center text-2xl tracking-[1em]"
-                maxLength={6}
-              />
+              <label className="text-sm font-semibold text-gray-700 ml-1">Masukkan PIN Login Aplikasi</label>
+              <div className="relative">
+                <input 
+                  type={showPin ? "text" : "password"}
+                  placeholder="******"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center text-xl tracking-[0.5em] font-mono"
+                  maxLength={6}
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPin(!showPin)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
             
             <button
@@ -96,7 +106,9 @@ export default function App() {
             </button>
           </form>
 
-          <p className="text-xs text-gray-400">Hubungi Admin untuk mendapatkan PIN</p>
+          <div className="pt-4 border-t border-gray-100">
+            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-3">Versi 2.0 - AsisGuru Pro</p>
+          </div>
         </div>
       </div>
     );
