@@ -25,6 +25,16 @@ interface LayoutProps {
 export function Layout({ children, user, logout, currentView, setView, apiKey, onApiKeyChange }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(window.innerWidth > 768);
   const [showApiKey, setShowApiKey] = React.useState(false);
+  const [localApiKey, setLocalApiKey] = React.useState(apiKey);
+
+  // Sync local key when prop changes (e.g. on mount)
+  React.useEffect(() => {
+    setLocalApiKey(apiKey);
+  }, [apiKey]);
+
+  const handleSaveApiKey = () => {
+    onApiKeyChange(localApiKey);
+  };
 
   // Close sidebar on navigation in mobile
   const handleNav = (view: string) => {
@@ -106,8 +116,8 @@ export function Layout({ children, user, logout, currentView, setView, apiKey, o
                 <input 
                   type={showApiKey ? "text" : "password"}
                   placeholder="Paste your key here..."
-                  value={apiKey}
-                  onChange={(e) => onApiKeyChange(e.target.value)}
+                  value={localApiKey}
+                  onChange={(e) => setLocalApiKey(e.target.value)}
                   className="w-full bg-white border border-purple-100 rounded-lg pl-3 pr-9 py-2 text-xs focus:ring-2 focus:ring-purple-400 outline-none shadow-sm transition-all"
                 />
                 <button 
@@ -118,6 +128,12 @@ export function Layout({ children, user, logout, currentView, setView, apiKey, o
                   {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
+              <button
+                onClick={handleSaveApiKey}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition-all shadow-sm active:scale-[0.98]"
+              >
+                Simpan API Key
+              </button>
               <p className="text-[10px] text-purple-400 leading-tight">Gunakan API Key sendiri untuk performa lebih baik.</p>
             </div>
           </div>

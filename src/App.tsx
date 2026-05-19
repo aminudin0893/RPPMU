@@ -52,6 +52,7 @@ export default function App() {
   const handleApiKeyChange = (val: string) => {
     setApiKey(val);
     localStorage.setItem("GEMINI_API_KEY", val);
+    alert("API Key Gemini berhasil disimpan!");
   };
 
   if (loading) {
