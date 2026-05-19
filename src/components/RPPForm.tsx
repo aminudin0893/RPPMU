@@ -128,22 +128,48 @@ export function RPPForm({ user, initialData, onBack, onSave, apiKey }: RPPFormPr
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Mata Pelajaran</label>
-              <select 
-                value={formData.subject}
-                onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-              >
-                <option>Pendidikan Agama Islam</option>
-                <option>Bahasa Indonesia</option>
-                <option>Matematika</option>
-                <option>IPA</option>
-                <option>IPS</option>
-                <option>Pendidikan Pancasila</option>
-                <option>Bahasa Inggris</option>
-                <option>Seni Budaya</option>
-                <option>PJOK</option>
-              </select>
+              <div className="flex items-center justify-between ml-1">
+                <label className="text-sm font-semibold text-gray-700">Mata Pelajaran</label>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const current = formData.subject;
+                    const isCommon = ["Pendidikan Agama Islam", "Bahasa Indonesia", "Matematika", "IPA", "IPS", "Pendidikan Pancasila", "Bahasa Inggris", "Seni Budaya", "PJOK"].includes(current);
+                    if (isCommon) {
+                      setFormData({...formData, subject: ""});
+                    } else {
+                      setFormData({...formData, subject: "Pendidikan Agama Islam"});
+                    }
+                  }}
+                  className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500 hover:bg-gray-200"
+                >
+                  {["Pendidikan Agama Islam", "Bahasa Indonesia", "Matematika", "IPA", "IPS", "Pendidikan Pancasila", "Bahasa Inggris", "Seni Budaya", "PJOK"].includes(formData.subject) ? "Ketik Manual" : "Pilih Daftar"}
+                </button>
+              </div>
+              {["Pendidikan Agama Islam", "Bahasa Indonesia", "Matematika", "IPA", "IPS", "Pendidikan Pancasila", "Bahasa Inggris", "Seni Budaya", "PJOK"].includes(formData.subject) ? (
+                <select 
+                  value={formData.subject}
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                >
+                  <option>Pendidikan Agama Islam</option>
+                  <option>Bahasa Indonesia</option>
+                  <option>Matematika</option>
+                  <option>IPA</option>
+                  <option>IPS</option>
+                  <option>Pendidikan Pancasila</option>
+                  <option>Bahasa Inggris</option>
+                  <option>Seni Budaya</option>
+                  <option>PJOK</option>
+                </select>
+              ) : (
+                <input 
+                  placeholder="Ketik Mata Pelajaran..."
+                  value={formData.subject}
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                />
+              )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">

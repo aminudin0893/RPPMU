@@ -34,23 +34,23 @@ app.post("/api/generate", async (req, res) => {
     }
     
     const prompts: Record<string, string> = {
-      pesertaDidik: `Identifikasi karakteristik peserta didik kelas ${grade} untuk mata pelajaran ${subject} dengan topik "${topic}". Berikan ringkasan yang membantu guru menyesuaikan pengajaran.`,
-      analisisMateri: `Lakukan analisis materi untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Sebutkan konsep kunci dan potensi kesulitan siswa.`,
-      capaian: `Berikan Capaian Pembelajaran (CP) yang relevan untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade} sesuai Kurikulum Merdeka.`,
-      lintasDisiplin: `Sebutkan keterkaitan topik "${topic}" (${subject} kelas ${grade}) dengan disiplin ilmu lain atau kehidupan nyata.`,
-      tujuan: `Rumuskan 3-5 Tujuan Pembelajaran (TP) yang ABCD (Audience, Behavior, Condition, Degree) untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}.`,
-      praktik: `Rekomendasikan praktik pedagogis atau model pembelajaran yang paling cocok untuk mengajarkan "${topic}" pada kelas ${grade}.`,
-      lingkungan: `Saran pengaturan lingkungan belajar (fisik/sosial) untuk mendukung pembelajaran topik "${topic}".`,
-      teknologi: `Saran pemanfaatan teknologi digital (aplikasi/alat) yang relevan untuk memperkuat pembelajaran "${topic}".`,
-      awal: `Tuliskan langkah-langkah kegiatan awal/pembukaan (sekitar 10-15 menit) yang menarik untuk memulai pelajaran tentang "${topic}".`,
-      inti: `Tuliskan langkah-langkah kegiatan inti pembelajaran yang aktif dan berpusat pada siswa untuk topik "${topic}". Gunakan pendekatan saintifik atau model yang disarankan.`,
-      penutup: `Tuliskan langkah-langkah kegiatan penutup (refleksi dan umpan balik) untuk mengakhiri sesi pembelajaran "${topic}".`,
-      asesmenAwal: `Rancang instrumen atau teknik asesmen awal (diagnostik) untuk mengukur kesiapan siswa sebelum mempelajari "${topic}".`,
-      asesmenProses: `Rancang teknik asesmen formatif selama proses pembelajaran "${topic}" untuk memantau kemajuan siswa.`,
-      asesmenAkhir: `Rancang instrumen asesmen sumatif di akhir pembelajaran topik "${topic}" untuk mengukur ketercapaian tujuan pembelajaran.`,
+      pesertaDidik: `Identifikasi karakteristik peserta didik kelas ${grade} untuk mata pelajaran ${subject} dengan topik "${topic}". Berikan ringkasan dalam poin-poin yang membantu guru menyesuaikan pengajaran.`,
+      analisisMateri: `Lakukan analisis materi untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Sebutkan konsep kunci dan potensi kesulitan siswa dalam poin-poin.`,
+      capaian: `Berikan Capaian Pembelajaran (CP) yang relevan untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade} sesuai Kurikulum Merdeka. Sajikan dalam poin-poin.`,
+      lintasDisiplin: `Sebutkan keterkaitan topik "${topic}" (${subject} kelas ${grade}) dengan disiplin ilmu lain atau kehidupan nyata dalam poin-poin.`,
+      tujuan: `Rumuskan 3-5 Tujuan Pembelajaran (TP) yang ABCD (Audience, Behavior, Condition, Degree) untuk topik "${topic}" pada mata pelajaran ${subject} kelas ${grade}. Tuliskan dalam poin-poin.`,
+      praktik: `Rekomendasikan praktik pedagogis atau model pembelajaran yang paling cocok untuk mengajarkan "${topic}" pada kelas ${grade}. Jelaskan langkah-langkahnya dalam poin-poin.`,
+      lingkungan: `Saran pengaturan lingkungan belajar (fisik/sosial) untuk mendukung pembelajaran topik "${topic}". Sajikan dalam poin-poin.`,
+      teknologi: `Saran pemanfaatan teknologi digital (aplikasi/alat) yang relevan untuk memperkuat pembelajaran "${topic}". Sajikan dalam poin-poin.`,
+      awal: `Tuliskan langkah-langkah kegiatan awal/pembukaan (sekitar 10-15 menit) yang menarik untuk memulai pelajaran tentang "${topic}". Sajikan dalam poin-poin.`,
+      inti: `Tuliskan langkah-langkah kegiatan inti pembelajaran yang aktif dan berpusat pada siswa untuk topik "${topic}". Gunakan pendekatan saintifik atau model yang disarankan. Sajikan dalam poin-poin detail.`,
+      penutup: `Tuliskan langkah-langkah kegiatan penutup (refleksi dan umpan balik) untuk mengakhiri sesi pembelajaran "${topic}". Sajikan dalam poin-poin.`,
+      asesmenAwal: `Rancang instrumen atau teknik asesmen awal (diagnostik) untuk mengukur kesiapan siswa sebelum mempelajari "${topic}". Sajikan dalam poin-poin.`,
+      asesmenProses: `Rancang teknik asesmen formatif selama proses pembelajaran "${topic}" untuk memantau kemajuan siswa. Sajikan dalam poin-poin.`,
+      asesmenAkhir: `Rancang instrumen asesmen sumatif di akhir pembelajaran topik "${topic}" untuk mengukur ketercapaian tujuan pembelajaran. Sajikan dalam poin-poin.`,
     };
 
-    const prompt = prompts[section] || `Berikan konten untuk bagian "${section}" pada modul ajar "${topic}" (${subject} kelas ${grade}). Context: ${context || ''}`;
+    const prompt = prompts[section] || `Berikan konten untuk bagian "${section}" pada modul ajar "${topic}" (${subject} kelas ${grade}). Gunakan poin-poin. Context: ${context || ''}`;
 
     const response = await activeAi.models.generateContent({
       model: "gemini-3-flash-preview",
