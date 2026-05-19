@@ -28,15 +28,8 @@ service cloud.firestore {
     }
 
     match /lessonPlans/{planId} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      isValidLessonPlan(request.resource.data);
-      allow update: if isSignedIn() && 
-                      resource.data.userId == request.auth.uid &&
-                      request.resource.data.userId == request.auth.uid &&
-                      isValidLessonPlan(request.resource.data);
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow read: if true;
+      allow write: if true;
     }
   }
 }

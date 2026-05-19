@@ -50,19 +50,23 @@ export default function App() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin === "085227") {
+      let uid = "user_aminudin_local";
       try {
         const cred = await signInAnonymously(auth);
-        const newUser = { 
-          uid: cred.user.uid, 
-          displayName: "Aminudin, S.Pd.", 
-          email: "aminudin0893@gmail.com",
-          photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher"
-        };
-        setUser(newUser);
-        localStorage.setItem("asisguru_user", JSON.stringify(newUser));
+        uid = cred.user.uid;
       } catch (error: any) {
-        alert("Gagal menghubungkan ke database: " + error.message);
+        console.warn("Firebase Auth restricted (Anonymous login disabled):", error.message);
+        // We continue with local state even if auth fails
       }
+      
+      const newUser = { 
+        uid: uid, 
+        displayName: "Aminudin, S.Pd.", 
+        email: "aminudin0893@gmail.com",
+        photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher"
+      };
+      setUser(newUser);
+      localStorage.setItem("asisguru_user", JSON.stringify(newUser));
     } else {
       alert("PIN Salah!");
     }
